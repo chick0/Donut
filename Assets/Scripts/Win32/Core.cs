@@ -13,7 +13,7 @@ namespace Win32
         static extern bool UnhookWindowsHookEx(IntPtr hInstance);
 
         [DllImport("user32.dll")]
-        static extern int CallNextHookEx(IntPtr idHook, int nCode, int wParam, ref KeyboardHookStruct IParam);
+        static extern int CallNextHookEx(IntPtr idHook, int nCode, int wParam, ref KeyboardHookStruct lParam);
 
         [DllImport("user32.dll")]
         static extern short GetKeyState(int nCode);
@@ -22,7 +22,7 @@ namespace Win32
         static extern IntPtr LoadLibrary(string IpFileName);
 
         // callback Delegate
-        public delegate int KeyboardHookProc(int code, int wParam, ref KeyboardHookStruct IParam);
+        public delegate int KeyboardHookProc(int code, int wParam, ref KeyboardHookStruct lParam);
 
         public struct KeyboardHookStruct
         {
@@ -100,7 +100,7 @@ namespace Win32
         /// 입력 처리
         /// </summary>
         [MonoPInvokeCallback(typeof(KeyboardHookProc))]
-        private static int HookProc(int code, int wParam, ref KeyboardHookStruct IParam)
+        private static int HookProc(int code, int wParam, ref KeyboardHookStruct lParam)
         {
             // code가 0보다 작으면 후크 절차는 추가 처리 없이 메시지를
             // CallNextHookEx 함수로 전달해야 하며 CallNextHookEx에서 반환된 값을 반환해야 합니다.
@@ -109,7 +109,7 @@ namespace Win32
             {
                 if (wParam == WM_KEYDOWN)
                 {
-                    VirtualKey vk = (VirtualKey)IParam.vkCode;
+                    VirtualKey vk = (VirtualKey)lParam.vkCode;
 #if UNITY_EDITOR
                     UnityEngine.Debug.Log("WM_KEYDOWN");
 #endif
@@ -117,7 +117,7 @@ namespace Win32
                 }
                 if (wParam == WM_KEYUP)
                 {
-                    VirtualKey vk = (VirtualKey)IParam.vkCode;
+                    VirtualKey vk = (VirtualKey)lParam.vkCode;
 #if UNITY_EDITOR
                     UnityEngine.Debug.Log("WM_KEYUP");
 #endif
@@ -125,7 +125,7 @@ namespace Win32
                 }
             }
 
-            return CallNextHookEx(hHookId, code, wParam, ref IParam);
+            return CallNextHookEx(hHookId, code, wParam, ref lParam);
         }
     }
 }
